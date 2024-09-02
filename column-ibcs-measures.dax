@@ -1,0 +1,178 @@
+DEFINE
+	// _5 Delta PY
+    MEASURE 'IBCS Data'[_5 Delta PY] = IF(
+		ISBLANK([_1 FC]), 
+		[_1 AC] - [_1 PY], 
+		[_1 FC] - [_1 PY]
+	)
+	
+	// _2 Max value
+    MEASURE 'IBCS Data'[_2 Max value] = IF(
+		ISBLANK([_1 FC]), 
+  		if(
+			[_1 AC]>[_1 PY], 
+			[_1 AC], [_1 PY]
+		),
+  		if(
+			[_1 PY]>[_1 FC], 
+			[_1 PY], [_1 FC]
+		)
+  	)
+		
+	// _1 FC
+    MEASURE 'IBCS Data'[_1 FC] = SUM('IBCS Data'[2023 Predictions])
+	
+	// _1 PY
+    MEASURE 'IBCS Data'[_1 PY] = SUM('IBCS data'[2022])
+	
+	// _1 AC
+    MEASURE 'IBCS Data'[_1 AC] = SUM('IBCS data'[2023])
+	
+	// _6 Delta PY
+    MEASURE 'IBCS Data'[_6 Delta PY %] = DIVIDE ([_5 Delta PY], [_1 PY])
+	
+	// _5 Delta PY Line
+    MEASURE 'IBCS Data'[_5 Delta PY Line] = [_4 ACPY MAX] * 2.3
+	
+	// _5 Delta PY Line Positive AC
+    MEASURE 'IBCS Data'[_5 Delta PY Line Positive AC] = IF(
+		ISBLANK([_1 FC]),
+		IF(
+			[_5 Delta PY] >0, 
+			[_5 Delta PY Line] + [_5 Delta PY], 
+			blank()
+		)
+	)
+	
+	// _5 Delta PY Line 2
+    MEASURE 'IBCS Data'[_5 Delta PY Line 2] = [_5 Delta PY Line]
+	
+	// _5 Delta PY Line Negative AC
+    MEASURE 'IBCS Data'[_5 Delta PY Line Negative AC] = IF(
+		ISBLANK([_1 FC]),
+		IF(
+			[_5 Delta PY] <0, 
+			[_5 Delta PY Line] + [_5 Delta PY], 
+			blank()
+		)
+	)
+	
+	// _6 Delta PY % Line
+    MEASURE 'IBCS Data'[_6 Delta PY % Line] = [_4 ACPY MAX] * 3.8
+	
+	// _6 Delta PY % Line 2
+    MEASURE 'IBCS Data'[_6 Delta PY % Line 2] = [_6 Delta PY % Line]
+	
+	// _6 Delta PY % Line Positive AC
+    MEASURE 'IBCS Data'[_6 Delta PY % Line Positive AC] = IF(
+		ISBLANK([_1 FC]),
+		IF(
+			[_6 Delta PY %] >0,
+			[_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier],
+			blank()
+		)
+	)
+		
+	// _6 Delta PY % Line Negative AC
+    MEASURE 'IBCS Data'[_6 Delta PY % Line Negative AC] = IF(
+		ISBLANK([_1 FC]),
+		IF(
+			[_6 Delta PY %] < 0,
+			[_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier],
+			blank()
+		)
+	)
+		
+	// _3 title color top
+    MEASURE 'IBCS Data'[_3 title color top] = IF(
+		ISBLANK([_1 FC]), 
+		if(
+			[_5 Delta PY] > 0,
+			"#000000",
+			"#B3B3B3"
+		),
+		if(
+			[_5 Delta PY] > 0,
+			"#118DFF",
+			"#B3B3B3"
+		)
+	)
+		
+	// _3 title color bot
+    MEASURE 'IBCS Data'[_3 title color bot] = IF(
+		ISBLANK([_1 FC]), 
+		if(
+			[_5 Delta PY] < 0,
+			"#000000",
+			"#B3B3B3"
+		),
+		if(
+			[_5 Delta PY] < 0,
+			"#118DFF",
+			"#B3B3B3"
+		)
+	)
+		
+	// _6 Delta PY % Line FC
+    MEASURE 'IBCS Data'[_6 Delta PY % Line FC] = IF(
+		ISBLANK([_1 FC]),blank(),
+		[_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier]
+	)
+	
+	// _5 Delta PY Line Negative FC
+    MEASURE 'IBCS Data'[_5 Delta PY Line Negative FC] = IF(
+		ISBLANK([_1 FC]),
+		blank(),
+		IF(
+			[_5 Delta PY] <0,
+			[_5 Delta PY Line] + [_5 Delta PY]
+		)
+	)
+	
+	// _5 Delta PY Line 3
+    MEASURE 'IBCS Data'[_5 Delta PY Line 3] = [_5 Delta PY Line]
+	
+	// _6 Delta PY % Line 3
+    MEASURE 'IBCS Data'[_6 Delta PY % Line 3] = [_6 Delta PY % Line]
+	
+	// _7 Delta PY % Vals
+    MEASURE 'IBCS Data'[_7 Delta PY % Vals] = IF(
+		[_6 Delta PY %] < 0,
+		[_6 Delta PY % Line]* 0.92 + [_6 Delta PY %]*[_7 Percentage Bar Modifier],
+		 [_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier]
+	)
+	
+	// _5 Delta PY Line Postivie FC
+    MEASURE 'IBCS Data'[_5 Delta PY Line Postivie FC] = IF(
+		ISBLANK([_1 FC]),
+		blank(),
+		IF(
+			[_5 Delta PY] >0, 
+			[_5 Delta PY Line] + [_5 Delta PY]
+		)
+	)
+	
+	// _7 Delta PY % label
+    MEASURE 'IBCS Data'[_7 Delta PY % label] = FORMAT(DIVIDE([_5 Delta PY], [_1 PY]), "0%")
+	
+	// _4 ACPY MAX
+    MEASURE 'IBCS Data'[_4 ACPY MAX] = MAXX(ALLSELECTED('IBCS Data'), [_2 Max value])
+	
+	// _4 Y Axis Max
+    MEASURE 'IBCS Data'[_4 Y Axis Max] = [_4 ACPY MAX] * 4.8
+	
+	// _2 Min value
+    MEASURE 'IBCS Data'[_2 Min value] = IF(
+		ISBLANK([_1 FC]), 
+  		if(
+			[_1 AC]<[_1 PY],
+			[_1 AC], [_1 PY]
+		),
+  		if(
+			[_1 PY]<[_1 FC], 
+			[_1 PY], [_1 FC]
+		)
+	)
+	
+	// _7 Percentage Bar Modifier
+    MEASURE 'IBCS Data'[_7 Percentage Bar Modifier] = DIVIDE( [_4 ACPY MAX], MAXX(ALLSELECTED('IBCS Data'), [_6 Delta PY %]))*0.7
