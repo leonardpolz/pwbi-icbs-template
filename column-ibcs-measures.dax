@@ -1,178 +1,231 @@
 DEFINE
-	// _5 Delta PY
-    MEASURE 'IBCS Data'[_5 Delta PY] = IF(
-		ISBLANK([_1 FC]), 
-		[_1 AC] - [_1 PY], 
-		[_1 FC] - [_1 PY]
-	)
+	// ============================================================================
+	// Basic Columns
+	// ============================================================================
 	
-	// _2 Max value
-    MEASURE 'IBCS Data'[_2 Max value] = IF(
-		ISBLANK([_1 FC]), 
+	// 1.1 SUM PL
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.1 SUM PL] = SUM('Month_Variance_Analysis_Results'[PL])
+
+	// 1.2 SUM AC
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.2 SUM AC] = SUM('Month_Variance_Analysis_Results'[AC])
+	
+	// 1.3 SUM FC
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.3 SUM FC] = SUM('Month_Variance_Analysis_Results'[FC])
+	
+	// 1.4 MAX of PL, AC, FC
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.4 MAX of PL, AC, FC] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]), 
   		if(
-			[_1 AC]>[_1 PY], 
-			[_1 AC], [_1 PY]
+			[A7D3 1.2 SUM AC]>[A7D3 1.1 SUM PL], 
+			[A7D3 1.2 SUM AC], 
+			[A7D3 1.1 SUM PL]
 		),
   		if(
-			[_1 PY]>[_1 FC], 
-			[_1 PY], [_1 FC]
+			[A7D3 1.1 SUM PL]>[A7D3 1.3 SUM FC], 
+			[A7D3 1.1 SUM PL], 
+			[A7D3 1.3 SUM FC]
 		)
   	)
-		
-	// _1 FC
-    MEASURE 'IBCS Data'[_1 FC] = SUM('IBCS Data'[2023 Predictions])
-	
-	// _1 PY
-    MEASURE 'IBCS Data'[_1 PY] = SUM('IBCS data'[2022])
-	
-	// _1 AC
-    MEASURE 'IBCS Data'[_1 AC] = SUM('IBCS data'[2023])
-	
-	// _6 Delta PY
-    MEASURE 'IBCS Data'[_6 Delta PY %] = DIVIDE ([_5 Delta PY], [_1 PY])
-	
-	// _5 Delta PY Line
-    MEASURE 'IBCS Data'[_5 Delta PY Line] = [_4 ACPY MAX] * 2.3
-	
-	// _5 Delta PY Line Positive AC
-    MEASURE 'IBCS Data'[_5 Delta PY Line Positive AC] = IF(
-		ISBLANK([_1 FC]),
-		IF(
-			[_5 Delta PY] >0, 
-			[_5 Delta PY Line] + [_5 Delta PY], 
-			blank()
+
+	// 1.5 MIN of PL, AC, FC
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.5 MIN of PL, AC, FC] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]), 
+  		if(
+			[A7D3 1.2 SUM AC]<[A7D3 1.1 SUM PL],
+			[A7D3 1.2 SUM AC],
+			[A7D3 1.1 SUM PL]
+		),
+  		if(
+			[A7D3 1.1 SUM PL]<[A7D3 1.3 SUM FC], 
+			[A7D3 1.1 SUM PL],
+			[A7D3 1.3 SUM FC]
 		)
 	)
 	
-	// _5 Delta PY Line 2
-    MEASURE 'IBCS Data'[_5 Delta PY Line 2] = [_5 Delta PY Line]
-	
-	// _5 Delta PY Line Negative AC
-    MEASURE 'IBCS Data'[_5 Delta PY Line Negative AC] = IF(
-		ISBLANK([_1 FC]),
-		IF(
-			[_5 Delta PY] <0, 
-			[_5 Delta PY Line] + [_5 Delta PY], 
-			blank()
-		)
+	// 1.6 DELTA from AC or FC to PL
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.6 DELTA from AC or FC to PL] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]), 
+		[A7D3 1.2 SUM AC] - [A7D3 1.1 SUM PL], 
+		[A7D3 1.3 SUM FC] - [A7D3 1.1 SUM PL]
 	)
 	
-	// _6 Delta PY % Line
-    MEASURE 'IBCS Data'[_6 Delta PY % Line] = [_4 ACPY MAX] * 3.8
-	
-	// _6 Delta PY % Line 2
-    MEASURE 'IBCS Data'[_6 Delta PY % Line 2] = [_6 Delta PY % Line]
-	
-	// _6 Delta PY % Line Positive AC
-    MEASURE 'IBCS Data'[_6 Delta PY % Line Positive AC] = IF(
-		ISBLANK([_1 FC]),
-		IF(
-			[_6 Delta PY %] >0,
-			[_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier],
-			blank()
-		)
-	)
-		
-	// _6 Delta PY % Line Negative AC
-    MEASURE 'IBCS Data'[_6 Delta PY % Line Negative AC] = IF(
-		ISBLANK([_1 FC]),
-		IF(
-			[_6 Delta PY %] < 0,
-			[_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier],
-			blank()
-		)
-	)
-		
-	// _3 title color top
-    MEASURE 'IBCS Data'[_3 title color top] = IF(
-		ISBLANK([_1 FC]), 
+	// 1.7 DATA LABEL COLOR TOP
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.7 DATA LABEL COLOR TOP] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]), 
 		if(
-			[_5 Delta PY] > 0,
+			[A7D3 1.6 DELTA from AC or FC to PL] > 0,
 			"#000000",
 			"#B3B3B3"
 		),
 		if(
-			[_5 Delta PY] > 0,
+			[A7D3 1.6 DELTA from AC or FC to PL] > 0,
 			"#118DFF",
 			"#B3B3B3"
 		)
 	)
 		
-	// _3 title color bot
-    MEASURE 'IBCS Data'[_3 title color bot] = IF(
-		ISBLANK([_1 FC]), 
+	// 1.8 DATA LABEL COLOR TOP
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 1.8 DATA LABEL COLOR BOT] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]), 
 		if(
-			[_5 Delta PY] < 0,
+			[A7D3 1.6 DELTA from AC or FC to PL] < 0,
 			"#000000",
 			"#B3B3B3"
 		),
 		if(
-			[_5 Delta PY] < 0,
+			[A7D3 1.6 DELTA from AC or FC to PL] < 0,
 			"#118DFF",
 			"#B3B3B3"
 		)
 	)
-		
-	// _6 Delta PY % Line FC
-    MEASURE 'IBCS Data'[_6 Delta PY % Line FC] = IF(
-		ISBLANK([_1 FC]),blank(),
-		[_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier]
+
+	// ============================================================================
+	// Delta Chart Preparations
+	// ============================================================================
+	
+	// 2.1 MAX GLOBAL PL, AC, FC
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 2.1 MAX GLOBAL PL, AC, FC] = MAXX(
+		ALLSELECTED('Month_Variance_Analysis_Results'), 
+		[A7D3 1.4 MAX of PL, AC, FC]
 	)
 	
-	// _5 Delta PY Line Negative FC
-    MEASURE 'IBCS Data'[_5 Delta PY Line Negative FC] = IF(
-		ISBLANK([_1 FC]),
-		blank(),
+	// 2.2 Y AXIS HEIGHT
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 2.2 Y AXIS HEIGHT] = [A7D3 2.1 MAX GLOBAL PL, AC, FC] * 4.8
+	
+	// ============================================================================
+	// Delta Chart 1
+	// ============================================================================
+	
+	// 3.1 DELTA LINE POSITIVE
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.1 DELTA LINE POSITIVE] = [A7D3 2.1 MAX GLOBAL PL, AC, FC] * 2.3
+	
+	// 3.2 Delta Line NEGATIVE
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.2 DELTA LINE NEGATIVE] = [A7D3 3.1 DELTA LINE POSITIVE]
+	
+	// 3.3 Delta Line NEUTRAL
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.3 DELTA LINE NEUTRAL] = [A7D3 3.1 DELTA LINE POSITIVE]
+	
+	// Line Label
+    MEASURE 'Month_Variance_Analysis_Results'[ΔPL] = [A7D3 3.1 DELTA LINE POSITIVE]
+	
+	// 3.4 DELTA LINE POSITIVE VALUES
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.4 DELTA LINE POSITIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
 		IF(
-			[_5 Delta PY] <0,
-			[_5 Delta PY Line] + [_5 Delta PY]
+			[A7D3 1.6 DELTA from AC or FC to PL] >0, 
+			[A7D3 3.1 DELTA LINE POSITIVE] + [A7D3 1.6 DELTA from AC or FC to PL], 
+			blank()
 		)
 	)
 	
-	// _5 Delta PY Line 3
-    MEASURE 'IBCS Data'[_5 Delta PY Line 3] = [_5 Delta PY Line]
-	
-	// _6 Delta PY % Line 3
-    MEASURE 'IBCS Data'[_6 Delta PY % Line 3] = [_6 Delta PY % Line]
-	
-	// _7 Delta PY % Vals
-    MEASURE 'IBCS Data'[_7 Delta PY % Vals] = IF(
-		[_6 Delta PY %] < 0,
-		[_6 Delta PY % Line]* 0.92 + [_6 Delta PY %]*[_7 Percentage Bar Modifier],
-		 [_6 Delta PY % Line] + [_6 Delta PY %]*[_7 Percentage Bar Modifier]
-	)
-	
-	// _5 Delta PY Line Postivie FC
-    MEASURE 'IBCS Data'[_5 Delta PY Line Postivie FC] = IF(
-		ISBLANK([_1 FC]),
-		blank(),
+	// 3.5 DELTA LINE NEGATIVE VALUES
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.5 DELTA LINE NEGATIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
 		IF(
-			[_5 Delta PY] >0, 
-			[_5 Delta PY Line] + [_5 Delta PY]
+			[A7D3 1.6 DELTA from AC or FC to PL] <0, 
+			[A7D3 3.2 DELTA LINE NEGATIVE] + [A7D3 1.6 DELTA from AC or FC to PL], 
+			blank()
 		)
 	)
 	
-	// _7 Delta PY % label
-    MEASURE 'IBCS Data'[_7 Delta PY % label] = FORMAT(DIVIDE([_5 Delta PY], [_1 PY]), "0%")
-	
-	// _4 ACPY MAX
-    MEASURE 'IBCS Data'[_4 ACPY MAX] = MAXX(ALLSELECTED('IBCS Data'), [_2 Max value])
-	
-	// _4 Y Axis Max
-    MEASURE 'IBCS Data'[_4 Y Axis Max] = [_4 ACPY MAX] * 4.8
-	
-	// _2 Min value
-    MEASURE 'IBCS Data'[_2 Min value] = IF(
-		ISBLANK([_1 FC]), 
-  		if(
-			[_1 AC]<[_1 PY],
-			[_1 AC], [_1 PY]
-		),
-  		if(
-			[_1 PY]<[_1 FC], 
-			[_1 PY], [_1 FC]
+	// 3.6 DELTA LINE NEUTRAL POSITIVE VALUES
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.6 DELTA LINE NEUTRAL POSITIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
+		BLANK(),
+		IF(
+			[A7D3 1.6 DELTA from AC or FC to PL] >0, 
+			[A7D3 3.3 DELTA LINE NEUTRAL] + [A7D3 1.6 DELTA from AC or FC to PL], 
+			blank()
 		)
 	)
 	
-	// _7 Percentage Bar Modifier
-    MEASURE 'IBCS Data'[_7 Percentage Bar Modifier] = DIVIDE( [_4 ACPY MAX], MAXX(ALLSELECTED('IBCS Data'), [_6 Delta PY %]))*0.7
+	// 3.7 DELTA LINE NEUTRAL NEGATIVE VALUES
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 3.7 DELTA LINE NEUTRAL NEGATIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
+		BLANK(),
+		IF(
+			[A7D3 1.6 DELTA from AC or FC to PL] <0, 
+			[A7D3 3.3 DELTA LINE NEUTRAL] + [A7D3 1.6 DELTA from AC or FC to PL], 
+			blank()
+		)
+	)
+	
+	// ============================================================================
+	// Delta Chart 2 (Percentage)
+	// ============================================================================
+	
+	// 4.1 DELTA % LINE POSITIVE
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.1 DELTA % LINE POSITIVE] = [A7D3 2.1 MAX GLOBAL PL, AC, FC] * 3.8
+	
+	// 4.2 DELTA % LINE NEGATIVE
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.2 DELTA % LINE NEGATIVE] = [A7D3 4.1 DELTA % LINE POSITIVE]
+	
+	// 4.3 DELTA % LINE NEUTRAL
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.3 DELTA % LINE NEUTRAL] = [A7D3 4.1 DELTA % LINE POSITIVE]
+	
+	// Line Label
+	MEASURE 'Month_Variance_Analysis_Results'[ΔPL%] = [A7D3 4.1 DELTA % LINE POSITIVE]
+	
+	// 4.4 DELTA from AC or FC to PL in %
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.4 DELTA from AC or FC to PL in %] = DIVIDE ([A7D3 1.6 DELTA from AC or FC to PL], [A7D3 1.1 SUM PL])
+	
+	// 4.5 Percentage Bar Modifier
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.5 Percentage Bar Modifier] = DIVIDE(
+		[A7D3 2.1 MAX GLOBAL PL, AC, FC], 
+		MAXX(
+			ALLSELECTED('Month_Variance_Analysis_Results'), 
+			[A7D3 4.4 DELTA from AC or FC to PL in %]
+		)
+	)
+	
+	// 4.6 DELTA LINE % POSITIVE VALUES
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.6 DELTA LINE % POSITIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
+		IF(
+			[A7D3 4.4 DELTA from AC or FC to PL in %] >0,
+			[A7D3 4.1 DELTA % LINE POSITIVE] + [A7D3 4.4 DELTA from AC or FC to PL in %]*[A7D3 4.5 Percentage Bar Modifier],
+			blank()
+		)
+	)
+	
+	// 4.7 DELTA LINE % NEGATIVE VALUES
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.7 DELTA LINE % NEGATIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
+		IF(
+			[A7D3 4.4 DELTA from AC or FC to PL in %] <0,
+			[A7D3 4.2 DELTA % LINE NEGATIVE] + [A7D3 4.4 DELTA from AC or FC to PL in %]*[A7D3 4.5 Percentage Bar Modifier],
+			blank()
+		)
+	)
+	
+	// 4.8 DELTA LINE % NEUTRAL POSITIVE VALUES
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.8 DELTA LINE % NEUTRAL POSITIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
+		BLANK(),
+		IF(
+			[A7D3 4.4 DELTA from AC or FC to PL in %] >0,
+			[A7D3 4.1 DELTA % LINE POSITIVE] + [A7D3 4.4 DELTA from AC or FC to PL in %]*[A7D3 4.5 Percentage Bar Modifier],
+			blank()
+		)
+	)
+	
+	// 4.9 DELTA LINE % NEUTRAL NEGATIVE VALUES
+	MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.9 DELTA LINE % NEUTRAL NEGATIVE VALUES] = IF(
+		ISBLANK([A7D3 1.3 SUM FC]),
+		BLANK(),
+		IF(
+			[A7D3 4.4 DELTA from AC or FC to PL in %] <0,
+			[A7D3 4.2 DELTA % LINE NEGATIVE] + [A7D3 4.4 DELTA from AC or FC to PL in %]*[A7D3 4.5 Percentage Bar Modifier],
+			blank()
+		)
+	)
+	
+	// 4.10 DELTA % LINE VALUE LABEL COLUMN
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.10 DELTA % LINE VALUE LABEL COLUMN] = IF(
+		[A7D3 4.4 DELTA from AC or FC to PL in %] < 0,
+		[A7D3 4.1 DELTA % LINE POSITIVE]* 0.92 + [A7D3 4.4 DELTA from AC or FC to PL in %]*[A7D3 4.5 Percentage Bar Modifier],
+		[A7D3 4.1 DELTA % LINE POSITIVE] + [A7D3 4.4 DELTA from AC or FC to PL in %]*[A7D3 4.5 Percentage Bar Modifier]
+	)
+	
+	// 4.11 DELTA % LINE VALUE LABEL
+    MEASURE 'Month_Variance_Analysis_Results'[A7D3 4.11 DELTA % LINE VALUE LABEL] = FORMAT(DIVIDE([A7D3 1.6 DELTA from AC or FC to PL], [A7D3 1.1 SUM PL]), "0%")
